@@ -56,20 +56,26 @@ class AIScrape:
         data = json.loads(completion.choices[0].message.content)
         return data["BEGIN"], data["END"]
 
-    def scrape(self, url):
+    def scrape(self, url, retries=3):
         """
         Scrapes a webpage, extracts its main content using the GPT model, and provides
         a debugging interface.
 
         Parameters:
             url (str): The URL of the webpage to scrape.
+            retries (int, optional): The number of times to retry the content extraction
+                                     if the first attempt fails. Defaults to 3.
 
         Returns:
             string: The content of the specified webpage.
         """
         text = get_url_text(url)
         begin, end = self._begin_end(text)
-        content = extract_content(text, begin, end)
+        content = None
+        retries = min(0, retries)
+        while content is None and retries >= 0:
+            content = extract_content(text, begin, end)
+            retries -= 1
         return content
 
 
